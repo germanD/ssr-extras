@@ -83,3 +83,48 @@ Proof. by rewrite -(@perm_eq_uniq _ s) // perm_swap.Qed.
 
 End Lemmas.
 End Swap.
+
+Section AMU.
+Variable (A: Type).
+Implicit Types (i j : nat) (s ss: seq A). 
+
+Definition many p s := if s is tc :: sss then p tc && all p sss else false.
+
+Definition one p s :=
+           match s with
+             | [::] => true
+             | [:: tc ] => p tc
+             | _ :: ss => false
+           end.
+
+Section AMULemmas.
+
+Lemma many_all p s: many p s -> all p s.
+Proof. by case: s=>//=[[|tc s]//]. Qed.
+
+Lemma one_all p s: one p s -> all p s.
+Proof. by case: s=>//=[tc][|s]//=->//. Qed.
+
+Lemma oneE p s: one p s <-> s = [::] \/ exists xs, s = [:: xs] /\ p xs.
+Proof.
+split=>//; last by case=>[->|[xs][->]P]//.
+by case: s=>[|xs ss]/=; first (by left); case: ss=>//= H; right; exists xs.
+Qed.
+
+Lemma many_cons p tc s:  many p ( tc :: s)  = p tc &&  all p s.
+Proof. by done. Qed.
+
+Lemma many_rcons p tc s: many p (rcons s tc) = all p s && p tc.
+Proof. by case:s=>//=[|s wv]; rewrite ?andbT // all_rcons andbAC andbA //. Qed.
+
+Lemma many_cat p r s : many p r -> many p s -> many p (r ++ s).
+Proof.
+by case: r=>//tr rr; rewrite cat_cons /= all_cat=>/andP[->]-> /many_all.
+Qed.                                                    
+
+Lemma manyNE p s:
+  many p s ->  exists tc, exists ss, [/\ p tc,  all p ss & s = tc :: ss].
+Proof. by case:s=>//= tc s /andP [P] H2; exists tc, s. Qed.
+
+End AMULemmas.
+End AMU.
