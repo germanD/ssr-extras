@@ -13,7 +13,7 @@ Require Import ssreflect ssrfun ssrbool ssrnat eqtype seq.
 (*                                                                            *) 
 (******************************************************************************)
 
-Section Surgery.
+Section SurgeryLemmas.
 Variable (A: Type).
 Implicit Types (i j : nat) (ls rs xs: seq A). 
 
@@ -47,5 +47,39 @@ case: i j =>//=[|i][|j]; rewrite ?drop0 ?subn0 //=.
 by rewrite ?ltnS ?leq0n ?lt0n IH //.
 Qed.  
 
-End Surgery.
+End SurgeryLemmas.
 
+Section Swap.
+(* Swapping the ith adn i.+1th elements of a list*) 
+
+Definition swap {A} i (xs : seq A) :=
+           let jis := if drop i xs is ti :: tj ::ss  then (tj :: ti :: ss)
+                            else (drop i xs)
+           in take i xs ++ jis.
+
+Section Lemmas.
+Variable (A: eqType).
+Implicit Types (i : nat) (ls rs xs: seq A). 
+
+Lemma swap_nil i: swap i (@nil A) = [::].
+Proof. by rewrite /swap //. Qed.
+
+Lemma swap_cons i l (s : seq A) :
+      swap i (l :: s)  = if s is (t :: ts)
+                         then if i is (S j) then l :: swap j s
+                              else t :: l :: ts 
+                         else l :: s.
+Proof. by rewrite /swap !take_cons !drop_cons;  case:i=>//n; case:s=>//. Qed.
+
+Lemma perm_swap {i} (s: seq A) : perm_eq s (swap i s).
+Proof.
+rewrite /swap -{1}(cat_take_drop i s) perm_cat2l; case:(drop i s)=>//a[|l r]//=.
+by rewrite -2!(cat1s _ r) -!cat_cons perm_cat2r -cat1s
+           -[in y in perm_eq _ y]cat1s perm_catC //.
+Qed.
+
+Lemma swap_uniq { i} (s : seq A): uniq s -> uniq (swap i s).
+Proof. by rewrite -(@perm_eq_uniq _ s) // perm_swap.Qed.
+
+End Lemmas.
+End Swap.
