@@ -47,6 +47,7 @@ case: i j =>//=[|i][|j]; rewrite ?drop0 ?subn0 //=.
 by rewrite ?ltnS ?leq0n ?lt0n IH //.
 Qed.  
 
+(* membership wr.t. take and drop *)
 Lemma mem_take_self (T: eqType) k (rs: seq T): k \notin take (index k rs) rs.
 Proof.
 by elim:rs=>//= a l IH; case:eqP=>//; rewrite in_cons negb_or IH =>/nesym/eqP->.
@@ -55,6 +56,12 @@ Qed.
 Lemma mem_drop_self (T: eqType) k (rs: seq T):
         k \in drop (index k rs) rs = (k \in rs).
 Proof. by elim:rs=>//= a l IH; case:ifP=>//; rewrite in_cons IH eq_sym=>->. Qed.
+
+Lemma mem_take_index (T: eqType) t k (rs: seq T):
+        t \in take (index k rs) rs = (index t rs < index k rs).
+Proof.
+by elim:rs=>//= a l IH; case:eqP=>//; rewrite in_cons eq_sym IH; case:eqP=>//.
+Qed.
 End SurgeryLemmas.
 
 Section Swap.
