@@ -47,6 +47,14 @@ case: i j =>//=[|i][|j]; rewrite ?drop0 ?subn0 //=.
 by rewrite ?ltnS ?leq0n ?lt0n IH //.
 Qed.  
 
+Lemma mem_take_self (T: eqType) k (rs: seq T): k \notin take (index k rs) rs.
+Proof.
+by elim:rs=>//= a l IH; case:eqP=>//; rewrite in_cons negb_or IH =>/nesym/eqP->.
+Qed.
+
+Lemma mem_drop_self (T: eqType) k (rs: seq T):
+        k \in drop (index k rs) rs = (k \in rs).
+Proof. by elim:rs=>//= a l IH; case:ifP=>//; rewrite in_cons IH eq_sym=>->. Qed.
 End SurgeryLemmas.
 
 Section Swap.
@@ -79,7 +87,7 @@ by rewrite -2!(cat1s _ r) -!cat_cons perm_cat2r -cat1s
 Qed.
 
 Lemma swap_uniq { i} (s : seq A): uniq s -> uniq (swap i s).
-Proof. by rewrite -(@perm_eq_uniq _ s) // perm_swap.Qed.
+Proof. by rewrite -(@perm_eq_uniq _ s) // perm_swap. Qed.
 
 End Lemmas.
 End Swap.
@@ -123,8 +131,9 @@ by case: r=>//tr rr; rewrite cat_cons /= all_cat=>/andP[->]-> /many_all.
 Qed.                                                    
 
 Lemma manyNE p s:
-  many p s ->  exists tc, exists ss, [/\ p tc,  all p ss & s = tc :: ss].
+  many p s ->  exists tc, exists ss, [/\ p tc, all p ss & s = tc :: ss].
 Proof. by case:s=>//= tc s /andP [P] H2; exists tc, s. Qed.
 
 End AMULemmas.
 End AMU.
+      
