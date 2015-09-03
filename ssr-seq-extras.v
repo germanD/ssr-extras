@@ -25,13 +25,13 @@ Qed.
 Lemma dropSW i j xs : drop i (drop j xs) =  drop j (drop i xs).
 Proof. by rewrite !dropA [j + i]addnC. Qed.
 
-Lemma takeM i j xs : take i (take j xs) = take (minn i j) xs.
+Lemma takeA i j xs : take i (take j xs) = take (minn i j) xs.
 Proof.
 by elim:xs i j=>//= x xs IH [|i] [|j]//=;rewrite IH /minn ltnS; case:ifP.
 Qed.
 
 Lemma takenn i xs: take i (take i xs) = take i xs.
-Proof. by rewrite takeM /minn ltnn. Qed.
+Proof. by rewrite takeA /minn ltnn. Qed.
 
 Lemma take_drop i j xs : take i (drop j xs) = drop j (take (i + j) xs).
 Proof.
@@ -62,6 +62,18 @@ Lemma mem_take_index (T: eqType) t k (rs: seq T):
 Proof.
 by elim:rs=>//= a l IH; case:eqP=>//; rewrite in_cons eq_sym IH; case:eqP=>//.
 Qed.
+
+(* add mem_drop_index *)
+
+Lemma drop_index (T: eqType) c (hs: seq T):
+        c \in hs -> uniq hs ->
+          drop (index c hs) hs = c :: drop (index c hs).+1 hs.
+Proof.
+elim:hs=>//= a l IH; case:eqP=>//= [->|E]; first by rewrite drop0.
+rewrite in_cons; case/orP=>[/eqP/(nesym E)//|].
+by move/IH{IH}=>IH /andP[_]/IH->.
+Qed.
+
 End SurgeryLemmas.
 
 Section Swap.
