@@ -14,6 +14,8 @@ Require Import ssreflect ssrfun ssrbool ssrnat eqtype seq.
 (******************************************************************************)
 
 Section SurgeryLemmas.
+
+Section Algebra.
 Variable (A: Type).
 Implicit Types (i j : nat) (ls rs xs: seq A). 
 
@@ -45,33 +47,6 @@ Proof.
 elim:xs i j=>//=[|x xs IH ] i j;first by rewrite if_same. 
 case: i j =>//=[|i][|j]; rewrite ?drop0 ?subn0 //=.
 by rewrite ?ltnS ?leq0n ?lt0n IH //.
-Qed.  
-
-Lemma drop_index {T: eqType} c (hs: seq T):
-       c \in hs -> drop (index c hs) hs = c :: drop (index c hs).+1 hs.
-Proof. by move=> C; rewrite (@drop_nth _ c _ _ ) ?index_mem // nth_index. Qed.
-
-(* membership wr.t. take and drop *)
-Lemma mem_take_self (T: eqType) k (rs: seq T): k \notin take (index k rs) rs.
-Proof.
-by elim:rs=>//= a l IH; case:eqP=>//; rewrite in_cons negb_or IH =>/nesym/eqP->.
-Qed.
-
-Lemma mem_drop_self {T: eqType} k (rs: seq T):
-        k \in drop (index k rs) rs = (k \in rs).
-Proof. by elim:rs=>//= a l IH; case:ifP=>//; rewrite in_cons IH eq_sym=>->. Qed.
-
-Lemma mem_take_index {T: eqType} t k (rs: seq T):
-        t \in take (index k rs) rs = (index t rs < index k rs).
-Proof.
-by elim:rs=>//= a l IH; case:eqP=>//; rewrite in_cons eq_sym IH; case:eqP=>//.
-Qed.
-
-Lemma mem_drop_index {T: eqType} t k (rs: seq T):
-      uniq rs -> t \in drop (index k rs) rs -> index k rs <= index t rs.
-Proof.
-elim rs=>//= [a]l IH /andP[/negP N]/IH{IH}IH.
-case:eqP=>E; rewrite eq_sym ?in_cons -?E; case:eqP=>//= -> /mem_drop/N//.
 Qed.
 
 (* all_surgery *)
@@ -81,6 +56,56 @@ Proof. by rewrite -{1}(cat_take_drop i xs) all_cat; case/andP=>_->. Qed.
 
 Lemma all_take p i xs: all p xs -> all p (take i xs).
 Proof. by rewrite -{1}(cat_take_drop i xs) all_cat; case/andP=>->. Qed.
+
+(* uniq_surgery *)
+
+Lemma uniq_drop  {T: eqType} i (rs: seq T): uniq rs -> uniq (drop i rs).
+Proof. by rewrite -{1}(cat_take_drop i rs) cat_uniq; case/and3P=>[_] _ ->. Qed.
+
+Lemma uniq_take  {T: eqType} i (rs: seq T): uniq rs -> uniq (take i rs).
+Proof. by rewrite -{1}(cat_take_drop i rs) cat_uniq; case/and3P=>->. Qed.
+
+End Algebra.
+
+Section MemSurgeryLemmas.
+Variable T: eqType.
+Implicit Types (t: T) (xs ls rs : seq T).  
+
+Lemma drop_index c rs:
+       c \in rs -> drop (index c rs) rs = c :: drop (index c rs).+1 rs.
+Proof. by move=> C; rewrite (@drop_nth _ c _ _ ) ?index_mem // nth_index. Qed.
+
+(* membership wr.t. take and drop *)
+Lemma mem_take_self k rs: k \notin take (index k rs) rs.
+Proof.
+by elim:rs=>//= a l IH; case:eqP=>//; rewrite in_cons negb_or IH =>/nesym/eqP->.
+Qed.
+
+Lemma mem_drop_self k rs: k \in drop (index k rs) rs = (k \in rs).
+Proof. by elim:rs=>//= a l IH; case:ifP=>//; rewrite in_cons IH eq_sym=>->. Qed.
+
+Lemma mem_drop_selfS k rs: uniq rs -> k \notin (drop (index k rs).+1 rs).
+Proof.
+by elim:rs=>//= a l IH /andP[N]/IH{IH}IH; case:eqP=>//= <-; rewrite drop0 N //.
+Qed.  
+
+Lemma mem_take_index t k rs:
+        t \in take (index k rs) rs = (index t rs < index k rs).
+Proof.
+by elim:rs=>//= a l IH; case:eqP=>//; rewrite in_cons eq_sym IH; case:eqP=>//.
+Qed.
+
+Lemma mem_drop_index t k rs:
+      uniq rs -> t \in drop (index k rs) rs -> index k rs <= index t rs.
+Proof.
+elim rs=>//= [a]l IH /andP[/negP N]/IH{IH}IH.
+case:eqP=>E; rewrite eq_sym ?in_cons -?E; case:eqP=>//= -> /mem_drop/N//.
+Qed.
+
+Lemma mem_dropW t k rs: t \in drop k.+1 rs -> t \in drop k rs.
+Proof. by rewrite -addn1 addnC -dropA=>/mem_drop. Qed.
+
+End MemSurgeryLemmas.
 
 End SurgeryLemmas.
 
