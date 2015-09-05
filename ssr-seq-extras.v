@@ -47,32 +47,40 @@ case: i j =>//=[|i][|j]; rewrite ?drop0 ?subn0 //=.
 by rewrite ?ltnS ?leq0n ?lt0n IH //.
 Qed.  
 
+Lemma drop_index {T: eqType} c (hs: seq T):
+       c \in hs -> drop (index c hs) hs = c :: drop (index c hs).+1 hs.
+Proof. by move=> C; rewrite (@drop_nth _ c _ _ ) ?index_mem // nth_index. Qed.
+
 (* membership wr.t. take and drop *)
 Lemma mem_take_self (T: eqType) k (rs: seq T): k \notin take (index k rs) rs.
 Proof.
 by elim:rs=>//= a l IH; case:eqP=>//; rewrite in_cons negb_or IH =>/nesym/eqP->.
 Qed.
 
-Lemma mem_drop_self (T: eqType) k (rs: seq T):
+Lemma mem_drop_self {T: eqType} k (rs: seq T):
         k \in drop (index k rs) rs = (k \in rs).
 Proof. by elim:rs=>//= a l IH; case:ifP=>//; rewrite in_cons IH eq_sym=>->. Qed.
 
-Lemma mem_take_index (T: eqType) t k (rs: seq T):
+Lemma mem_take_index {T: eqType} t k (rs: seq T):
         t \in take (index k rs) rs = (index t rs < index k rs).
 Proof.
 by elim:rs=>//= a l IH; case:eqP=>//; rewrite in_cons eq_sym IH; case:eqP=>//.
 Qed.
 
-(* add mem_drop_index *)
-
-Lemma drop_index (T: eqType) c (hs: seq T):
-        c \in hs -> uniq hs ->
-          drop (index c hs) hs = c :: drop (index c hs).+1 hs.
+Lemma mem_drop_index {T: eqType} t k (rs: seq T):
+      uniq rs -> t \in drop (index k rs) rs -> index k rs <= index t rs.
 Proof.
-elim:hs=>//= a l IH; case:eqP=>//= [->|E]; first by rewrite drop0.
-rewrite in_cons; case/orP=>[/eqP/(nesym E)//|].
-by move/IH{IH}=>IH /andP[_]/IH->.
+elim rs=>//= [a]l IH /andP[/negP N]/IH{IH}IH.
+case:eqP=>E; rewrite eq_sym ?in_cons -?E; case:eqP=>//= -> /mem_drop/N//.
 Qed.
+
+(* all_surgery *)
+
+Lemma all_drop p i xs: all p xs -> all p (drop i xs).
+Proof. by rewrite -{1}(cat_take_drop i xs) all_cat; case/andP=>_->. Qed.
+
+Lemma all_take p i xs: all p xs -> all p (take i xs).
+Proof. by rewrite -{1}(cat_take_drop i xs) all_cat; case/andP=>->. Qed.
 
 End SurgeryLemmas.
 
@@ -155,4 +163,4 @@ Proof. by case:s=>//= tc s /andP [P] H2; exists tc, s. Qed.
 
 End AMULemmas.
 End AMU.
-      
+
