@@ -102,8 +102,14 @@ elim rs=>//= [a]l IH /andP[/negP N]/IH{IH}IH.
 case:eqP=>E; rewrite eq_sym ?in_cons -?E; case:eqP=>//= -> /mem_drop/N//.
 Qed.
 
-Lemma mem_dropW t k rs: t \in drop k.+1 rs -> t \in drop k rs.
+Lemma mem_dropS t k rs: t \in drop k.+1 rs -> t \in drop k rs.
 Proof. by rewrite -addn1 addnC -dropA=>/mem_drop. Qed.
+
+Lemma mem_takeS t k rs: t \in take k rs -> t \in take k.+1 rs.
+Proof.
+elim:rs k=>//= a l IH;case=>//n; rewrite !in_cons.
+by case/orP=>[->//|/IH ->]; rewrite orbT.
+Qed.
 
 End MemSurgeryLemmas.
 
@@ -188,4 +194,3 @@ Proof. by case:s=>//= tc s /andP [P] H2; exists tc, s. Qed.
 
 End AMULemmas.
 End AMU.
-
