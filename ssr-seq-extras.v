@@ -189,8 +189,15 @@ by case: r=>//tr rr; rewrite cat_cons /= all_cat=>/andP[->]-> /many_all.
 Qed.                                                    
 
 Lemma manyNE p s:
-  many p s ->  exists tc, exists ss, [/\ p tc, all p ss & s = tc :: ss].
+       many p s ->  exists tc, exists ss, [/\ p tc, all p ss & s = tc :: ss].
 Proof. by case:s=>//= tc s /andP [P] H2; exists tc, s. Qed.
+
+Lemma all_perm_eq (T : eqType) p (r s : seq T):
+       perm_eq r s -> all p r -> all p s. 
+Proof.
+move/perm_eq_mem =>RS /allP R; case:allP=>// S.
+by apply:False_ind; apply:S=> x; rewrite -RS=> /R.
+Qed.
 
 End AMULemmas.
 End AMU.
