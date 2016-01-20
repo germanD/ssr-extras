@@ -1,6 +1,7 @@
 (* (c) GAD and the IMDEA Software Institute*)
 (* You may distribute this file under the terms of the CeCILL-B license *)
-Require Import ssreflect ssrfun ssrbool ssrnat eqtype seq.
+Require Import Ssreflect.ssreflect Ssreflect.ssrfun Ssreflect.ssrbool.
+Require Import Ssreflect.ssrnat Ssreflect.eqtype Ssreflect.seq.
 
 (******************************************************************************)
 (* Several lemmas about lists that are nowherere to be found in the latest    *)
@@ -93,6 +94,15 @@ Lemma mem_take_index t k rs:
         t \in take (index k rs) rs = (index t rs < index k rs).
 Proof.
 by elim:rs=>//= a l IH; case:eqP=>//; rewrite in_cons eq_sym IH; case:eqP=>//.
+Qed.
+
+Lemma index_take t k rs:
+        index t (take k rs) = if (index t rs) <= k then index t rs
+                              else size (take k rs).
+Proof.
+elim: k rs=>//= [|n IH] rs; first by rewrite take0 //= leqn0; case:eqP=>//.
+case:rs=>//a ls /=.
+by case:eqP=>// E; rewrite IH ltnS; case:ifP=>//.
 Qed.
 
 Lemma mem_drop_index t k rs:
