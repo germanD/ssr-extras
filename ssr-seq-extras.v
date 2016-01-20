@@ -105,6 +105,19 @@ case:rs=>//a ls /=.
 by case:eqP=>// E; rewrite IH ltnS; case:ifP=>//.
 Qed.
 
+Lemma index_drop_uniq t k rs:
+      uniq rs -> index t (drop k rs) = if (index t rs) < k then size (drop k rs)
+                                       else if (size rs <= k) then 0
+                                            else index t rs - k.
+Proof.
+elim:rs k=>//[|a l IH ][]//=; first by rewrite subn0.
+move=>n /andP[A]/IH{IH} IH; rewrite ltnS IH; case:eqP=>//=E.
+do 2 case:ifP=>//; move=>P1 P2; first by rewrite drop_oversize //.
+rewrite size_drop.
+rewrite E -index_mem ltn_neqAle negb_and (index_size t l) orbF /= in A.
+by case:(@eqP _ (index t l) (size l)) A=>[->|/eqP]//.
+Qed.
+
 Lemma mem_drop_index t k rs:
       uniq rs -> t \in drop (index k rs) rs -> index k rs <= index t rs.
 Proof.
