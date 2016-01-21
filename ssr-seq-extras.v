@@ -14,6 +14,18 @@ Require Import Ssreflect.ssrnat Ssreflect.eqtype Ssreflect.seq.
 (*                                                                            *) 
 (******************************************************************************)
 
+Section Indexes.
+Implicit Type (T : eqType).
+
+Lemma uniq_last_index {T} n0 (s: seq T) :
+       uniq s -> index (last n0 s) s = (size s).-1.
+Proof.
+elim/last_ind:s=>//s t _.
+rewrite last_rcons  size_rcons rcons_uniq -cats1 index_cat /=. 
+case/andP=>/negP H U; case:ifP=>//_; rewrite eq_refl addn0 //.
+Qed.
+End Indexes.
+
 Section SurgeryLemmas.
 
 Section Algebra.
