@@ -26,6 +26,24 @@ case/andP=>/negP H U; case:ifP=>//_; rewrite eq_refl addn0 //.
 Qed.
 End Indexes.
 
+Section Filtering.
+Variable (A: Type).
+Lemma filter0 (r: seq A) : @filter A xpred0 r = [::].
+Proof. by elim:r. Qed.
+
+Lemma filterT (r: seq A) : @filter A xpredT r = r.
+Proof. by elim:r=>//= a l ->. Qed.
+
+Lemma uniq_perm_filter {T:eqType} p (r s: seq T): 
+       uniq r -> perm_eq r s -> perm_eq (filter p r) (filter p s).
+Proof.
+move=> US E.
+move:(perm_eq_uniq E) (US)=>-> UR.
+apply:uniq_perm_eq; try by rewrite  filter_uniq //. 
+by move=>x ; rewrite !mem_filter (perm_eq_mem E).
+Qed.
+End Filtering.
+
 Section SurgeryLemmas.
 
 Section Algebra.
