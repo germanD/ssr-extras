@@ -164,6 +164,23 @@ elim:rs k=>//= a l IH;case=>//n; rewrite !in_cons.
 by case/orP=>[->//|/IH ->]; rewrite orbT.
 Qed.
 
+Lemma mem_take_ltn a n rs:
+         (a \in take n rs) -> (index a rs < n).
+Proof.
+elim:n rs=>[|n IH]s; first by rewrite take0 //.
+case:s=>//= r s; rewrite in_cons eq_sym.
+case/orP=>[/eqP ->|]; rewrite ?eq_refl // ltnS.
+by case:eqP=>//_ /IH.
+Qed.
+
+Lemma mem_drop_ltn a n rs:
+       uniq rs -> (a \in drop n rs) -> (index a rs >= n).
+Proof.
+elim:n rs=>[|n IH]s; first by rewrite drop0 //.
+case:s=>//= r s.
+case:eqP=>//[->|_]/andP[/negP R]U; first by move/mem_drop.
+by apply:IH.
+Qed.
 End MemSurgeryLemmas.
 
 End SurgeryLemmas.
