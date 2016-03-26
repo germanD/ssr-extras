@@ -58,13 +58,13 @@ Qed.
 Lemma dropSW i j xs : drop i (drop j xs) =  drop j (drop i xs).
 Proof. by rewrite !dropA [j + i]addnC. Qed.
 
-Lemma takeA i j xs : take i (take j xs) = take (minn i j) xs.
+Lemma takeM i j xs : take i (take j xs) = take (minn i j) xs.
 Proof.
 by elim:xs i j=>//= x xs IH [|i] [|j]//=;rewrite IH /minn ltnS; case:ifP.
 Qed.
 
 Lemma takenn i xs: take i (take i xs) = take i xs.
-Proof. by rewrite takeA /minn ltnn. Qed.
+Proof. by rewrite takeM /minn ltnn. Qed.
 
 Lemma take_drop i j xs : take i (drop j xs) = drop j (take (i + j) xs).
 Proof.
@@ -107,6 +107,15 @@ Lemma drop_index c rs:
 Proof. by move=> C; rewrite (@drop_nth _ c _ _ ) ?index_mem // nth_index. Qed.
 
 (* membership wr.t. take and drop *)
+Lemma mem_dropW t j k rs:
+        k <= j -> t \in drop j rs -> t \in drop k rs.
+Proof. by move=>W; rewrite -[j](subnK W) -dropA => /mem_drop //. Qed.
+
+Lemma mem_takeW t j k (rs: seq T):
+        k <= j -> t \in take k rs -> t \in take j rs.
+Proof.
+by move=>W; rewrite -[k](subKn W) -minnE minnC -takeM=> /mem_take. Qed.
+
 Lemma mem_take_self k rs: k \notin take (index k rs) rs.
 Proof.
 by elim:rs=>//= a l IH; case:eqP=>//; rewrite in_cons negb_or IH =>/nesym/eqP->.
@@ -155,14 +164,6 @@ elim rs=>//= [a]l IH /andP[/negP N]/IH{IH}IH.
 case:eqP=>E; rewrite eq_sym ?in_cons -?E; case:eqP=>//= -> /mem_drop/N//.
 Qed.
 
-Lemma mem_dropS t k rs: t \in drop k.+1 rs -> t \in drop k rs.
-Proof. by rewrite -addn1 addnC -dropA=>/mem_drop. Qed.
-
-Lemma mem_takeS t k rs: t \in take k rs -> t \in take k.+1 rs.
-Proof.
-elim:rs k=>//= a l IH;case=>//n; rewrite !in_cons.
-by case/orP=>[->//|/IH ->]; rewrite orbT.
-Qed.
 
 Lemma mem_take_ltn a n rs:
          (a \in take n rs) -> (index a rs < n).
